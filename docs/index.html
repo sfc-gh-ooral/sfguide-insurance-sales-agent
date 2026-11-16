@@ -12,7 +12,7 @@
     "generated": "2026-11-16",
     "intent": "Landing page for the Insurance Sales Performance Agent Snow Pack (synthetic data example)",
     "dataSources": [
-      { "type": "file", "path": "docs/images/*.png", "notes": "Screenshots of the hosted example (docs/try/) in sample-data mode, captured with headless Chrome" },
+      { "type": "file", "path": "docs/images/*.png", "notes": "Screenshots of the hosted example (docs/try/) in sample-data mode, captured in the Cortex Code browser" },
       { "type": "file", "path": "sql/setup.sql", "notes": "Objects named on this page" }
     ],
     "sections": [
@@ -134,8 +134,7 @@
       </ul>
       <figure class="hero-shot">
         <picture>
-          <source srcset="images/01-overview-light.png" media="(prefers-color-scheme: light)" />
-          <img src="images/01-overview-dark.png" width="1440" height="900" alt="Territory overview: written premium, contracts, attach rate, loss ratio, and market share with year-over-year changes, a monthly trend, and contracts by region with Southeast down 13.8%." />
+          <img src="images/01-overview.png" width="1280" height="800" alt="Territory overview: written premium, contracts, attach rate, loss ratio, and market share with year-over-year changes, a monthly trend, and contracts by region with Southeast down 13.8%." />
         </picture>
       </figure>
       <p class="note"><strong>Synthetic data, illustrative logic.</strong> Every dealer, rep, and number on this page is invented by a seeded generator. This is an example, not production software, and not regulatory, actuarial, or compliance advice.</p>
@@ -166,7 +165,7 @@
             <span class="badge">Semantic View</span>
           </div>
           <figure>
-            <div class="frame"><picture><source srcset="images/01-overview-light.png" media="(prefers-color-scheme: light)" /><img src="images/01-overview-dark.png" width="1440" height="900" loading="lazy" alt="Territory overview with KPI tiles and a contracts-by-region table flagging Southeast at minus 13.8 percent and an Ask the agent why link." /></picture></div>
+            <div class="frame"><picture><img src="images/01-overview.png" width="1280" height="800" loading="lazy" alt="Territory overview with KPI tiles and a contracts-by-region table flagging Southeast at minus 13.8 percent and an Ask the agent why link." /></picture></div>
             <figcaption>Territory overview. KPI definitions come from the semantic view, so they match the BI report.</figcaption>
           </figure>
         </div>
@@ -179,7 +178,7 @@
             <span class="badge">Cortex Agents</span><span class="badge">Cortex Analyst</span><span class="badge">Verified queries</span>
           </div>
           <figure>
-            <div class="frame"><picture><source srcset="images/02-agent-southeast-light.png" media="(prefers-color-scheme: light)" /><img src="images/02-agent-southeast-dark.png" width="1440" height="900" loading="lazy" alt="Agent answer explaining the Southeast decline with three named dealers, a bar chart of contract change by dealer, a Verified query badge, and the SQL used." /></picture></div>
+            <div class="frame"><picture><img src="images/02-agent-southeast.png" width="1280" height="800" loading="lazy" alt="Agent answer explaining the Southeast decline with three named dealers, a bar chart of contract change by dealer, a Verified query badge, and the SQL used." /></picture></div>
             <figcaption>The Cortex Agent answers with a chart and the SQL behind it. In the hosted example, answers are labeled "Sample AI response".</figcaption>
           </figure>
         </div>
@@ -192,7 +191,7 @@
             <span class="badge">Semantic View</span><span class="badge ai">AI_COMPLETE</span>
           </div>
           <figure>
-            <div class="frame"><picture><source srcset="images/04-dealer-detail-light.png" media="(prefers-color-scheme: light)" /><img src="images/04-dealer-detail-dark.png" width="1440" height="900" loading="lazy" alt="Dealer detail for Fairhaven Car Center: loss ratio decomposition table with GAP at 111.9 percent tagged Severity, product mix and attach rate charts, and a visit prep brief saved to My insights." /></picture></div>
+            <div class="frame"><picture><img src="images/04-dealer-detail.png" width="1280" height="800" loading="lazy" alt="Dealer detail for Fairhaven Car Center: loss ratio decomposition table with GAP at 111.9 percent tagged Severity, product mix and attach rate charts, and a visit prep brief saved to My insights." /></picture></div>
             <figcaption>Loss ratio decomposition and an AI visit prep brief. In live mode the brief comes from AI_COMPLETE.</figcaption>
           </figure>
         </div>
@@ -205,7 +204,7 @@
             <span class="badge">Human in the loop</span>
           </div>
           <figure>
-            <div class="frame"><picture><source srcset="images/05-my-insights-light.png" media="(prefers-color-scheme: light)" /><img src="images/05-my-insights-dark.png" width="1440" height="900" loading="lazy" alt="My insights page with a saved visit brief for Fairhaven Car Center, a rep's note, a pinned agent answer, and buttons to export the visit brief or print it." /></picture></div>
+            <div class="frame"><picture><img src="images/05-my-insights.png" width="1280" height="800" loading="lazy" alt="My insights page with a saved visit brief for Fairhaven Car Center, a rep's note, a pinned agent answer, and buttons to export the visit brief or print it." /></picture></div>
             <figcaption>Pinned answers and briefs with the rep's notes, ready to export.</figcaption>
           </figure>
         </div>
@@ -218,18 +217,18 @@
             <span class="badge">Row access policy</span>
           </div>
           <figure>
-            <div class="frame"><picture><source srcset="images/07-rep-view-light.png" media="(prefers-color-scheme: light)" /><img src="images/07-rep-view-dark.png" width="1440" height="900" loading="lazy" alt="Dealer explorer viewed as a field rep: 56 dealers in the Southeast Inland territory with a Row access policy applied badge." /></picture></div>
+            <div class="frame"><picture><img src="images/07-rep-view.png" width="1280" height="800" loading="lazy" alt="Dealer explorer viewed as a field rep: 56 dealers in the Southeast Inland territory with a Row access policy applied badge." /></picture></div>
             <figcaption>Rep view. The row access policy, not app code, decides which dealers appear in live mode.</figcaption>
           </figure>
         </div>
 
         <div class="two">
           <figure>
-            <div class="frame"><picture><source srcset="images/06-dealer-movers-light.png" media="(prefers-color-scheme: light)" /><img src="images/06-dealer-movers-dark.png" width="1440" height="900" loading="lazy" alt="Movers tab listing the biggest decliners, led by three dealers that switched provider, and the biggest gainers, led by Summit Auto Group dealers." /></picture></div>
+            <div class="frame"><picture><img src="images/06-dealer-movers.png" width="1280" height="800" loading="lazy" alt="Movers tab listing the biggest decliners, led by three dealers that switched provider, and the biggest gainers, led by Summit Auto Group dealers." /></picture></div>
             <figcaption>Movers: the three provider switches top the decliners; a fast-growing dealer group leads the gainers.</figcaption>
           </figure>
           <figure>
-            <div class="frame"><picture><source srcset="images/03-agent-georgia-light.png" media="(prefers-color-scheme: light)" /><img src="images/03-agent-georgia-dark.png" width="1440" height="900" loading="lazy" alt="Agent answer showing the Georgia GAP loss ratio increase is driven by severity, with a chart of changes in loss ratio, frequency, and severity." /></picture></div>
+            <div class="frame"><picture><img src="images/03-agent-georgia.png" width="1280" height="800" loading="lazy" alt="Agent answer showing the Georgia GAP loss ratio increase is driven by severity, with a chart of changes in loss ratio, frequency, and severity." /></picture></div>
             <figcaption>The agent confirms the Georgia GAP increase is driven by severity, not frequency.</figcaption>
           </figure>
         </div>

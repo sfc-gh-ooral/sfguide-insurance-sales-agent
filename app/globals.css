@@ -77,6 +77,7 @@ body {
 .recharts-tooltip-wrapper .recharts-default-tooltip {
   background: var(--surface) !important; border: 1px solid var(--border) !important; border-radius: 8px; color: var(--text);
 }
+.recharts-default-tooltip .recharts-tooltip-item, .recharts-default-tooltip .recharts-tooltip-label { color: var(--text) !important; }
 @media print {
   aside, header, .no-print { display: none !important; }
   main { margin: 0 !important; padding: 0 !important; }

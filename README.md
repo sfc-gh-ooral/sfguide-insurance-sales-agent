@@ -18,7 +18,7 @@ Field reps who sell vehicle service contracts (VSC), GAP, tire & wheel, appearan
 
 A **View as** switch toggles between a regional sales director (all territories) and a field rep (one territory). In live mode it changes the Snowflake role, so a row access policy, not app code, decides what the rep sees.
 
-![Territory overview](docs/images/01-overview-dark.png)
+![Territory overview](docs/images/01-overview.png)
 
 ## Prerequisites
 
