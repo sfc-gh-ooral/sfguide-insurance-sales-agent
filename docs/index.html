@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="snowflake-source" content="cortex-agent-authored" />
+  <meta name="description" content="Help insurance sales teams explain loss ratios, dealer performance, and market share in plain English, alongside the reports they already use. A synthetic-data example built on Snowflake." />
+  <title>Insurance Sales Performance Agent · Snowflake example</title>
+  <script type="application/json" id="snowflake-report-metadata">
+  {
+    "generated": "2026-11-16",
+    "intent": "Landing page for the Insurance Sales Performance Agent Snow Pack (synthetic data example)",
+    "dataSources": [
+      { "type": "file", "path": "docs/images/*.png", "notes": "Screenshots of the hosted example (docs/try/) in sample-data mode, captured with headless Chrome" },
+      { "type": "file", "path": "sql/setup.sql", "notes": "Objects named on this page" }
+    ],
+    "sections": [
+      { "id": "problem", "title": "The problem" },
+      { "id": "walkthrough", "title": "Walkthrough", "producerNotes": "Numbers in captions come from the seeded synthetic data (scripts/generate-data.mjs, seed 20261112); recapture screenshots after UI changes." },
+      { "id": "capabilities", "title": "Snowflake capabilities" },
+      { "id": "run", "title": "Run it" },
+      { "id": "accuracy", "title": "Verified query check" }
+    ]
+  }
+  </script>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: light-dark(#f6f8fb, #0d141c);
+      --surface: light-dark(#ffffff, #141e29);
+      --surface-2: light-dark(#eef2f7, #1b2734);
+      --border: light-dark(#dde3ea, #2a3847);
+      --text: light-dark(#13202e, #e8eef4);
+      --text-2: light-dark(#4a5a6b, #b3c0cd);
+      --muted: light-dark(#647487, #8696a7);
+      --accent: light-dark(#1a6ce7, #5aa2ff);
+      --accent-soft: light-dark(#e6f0fd, #16304f);
+      --ai: light-dark(#7044c4, #b69cff);
+      --warn-bg: light-dark(#fff7e8, #2b2214);
+      --warn-border: light-dark(#f0d29a, #5a4520);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent); }
+    img { max-width: 100%; height: auto; display: block; }
+    .wrap { width: 100%; max-width: 1120px; margin: 0 auto; padding: 0 clamp(16px, 4vw, 32px); }
+    header.top { border-bottom: 1px solid var(--border); background: var(--surface); }
+    header.top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 14px; padding-bottom: 14px; flex-wrap: wrap; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; color: var(--text); text-decoration: none; }
+    .brand-mark { width: 30px; height: 30px; border-radius: 8px; background: var(--accent); display: grid; place-items: center; }
+    .brand small { display: block; font-weight: 400; font-size: 12px; color: var(--muted); }
+    nav.top-links { display: flex; gap: 18px; flex-wrap: wrap; font-size: 14px; }
+    nav.top-links a { color: var(--text-2); text-decoration: none; }
+    nav.top-links a:hover { color: var(--accent); }
+    .hero { padding: clamp(36px, 7vw, 72px) 0 32px; }
+    .eyebrow { display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); background: var(--accent-soft); padding: 4px 10px; border-radius: 999px; }
+    h1 { font-size: clamp(30px, 5vw, 46px); line-height: 1.12; margin: 16px 0 14px; letter-spacing: -0.02em; max-width: 20ch; }
+    .lede { font-size: clamp(17px, 2.2vw, 19px); color: var(--text-2); max-width: 64ch; margin: 0 0 24px; }
+    .ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 28px; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 18px; border-radius: 10px; font-weight: 600; font-size: 15px; text-decoration: none; border: 1px solid var(--border); color: var(--text); background: var(--surface); }
+    .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 0; padding: 0; list-style: none; }
+    .facts li { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; font-size: 14px; color: var(--text-2); }
+    .facts strong { display: block; color: var(--text); font-size: 13px; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 2px; }
+    .hero-shot { margin-top: 32px; border-radius: 14px; overflow: hidden; border: 1px solid var(--border); box-shadow: 0 12px 40px rgba(10, 20, 40, .18); }
+    .note { margin: 24px 0 0; padding: 14px 16px; border-radius: 12px; background: var(--warn-bg); border: 1px solid var(--warn-border); font-size: 14px; color: var(--text-2); }
+    section.block { padding: clamp(36px, 6vw, 64px) 0; border-top: 1px solid var(--border); }
+    h2 { font-size: clamp(24px, 3.4vw, 32px); line-height: 1.2; margin: 0 0 12px; letter-spacing: -0.01em; }
+    h3 { font-size: 18px; margin: 0 0 6px; }
+    .sub { color: var(--text-2); max-width: 70ch; margin: 0 0 28px; }
+    .grid3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
+    .card p { margin: 0; color: var(--text-2); font-size: 15px; }
+    .step { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; margin: 0 0 44px; }
+    @media (min-width: 900px) { .step { grid-template-columns: 320px minmax(0, 1fr); gap: 32px; align-items: start; } }
+    .step-num { font-size: 13px; font-weight: 700; color: var(--accent); letter-spacing: .05em; text-transform: uppercase; }
+    .step p { color: var(--text-2); margin: 6px 0 10px; }
+    .badge { display: inline-block; font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border); color: var(--text-2); margin: 2px 4px 2px 0; }
+    .badge.ai { color: var(--ai); }
+    figure { margin: 0; }
+    figure .frame { border-radius: 12px; overflow: hidden; border: 1px solid var(--border); background: var(--surface); }
+    figcaption { font-size: 14px; color: var(--muted); margin-top: 8px; }
+    .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+    table { border-collapse: collapse; width: 100%; font-size: 14px; }
+    th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    th { background: var(--surface-2); font-weight: 600; }
+    tr:last-child td { border-bottom: 0; }
+    code { font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--surface-2); padding: 1px 5px; border-radius: 4px; }
+    pre { overflow-x: auto; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; font: 13px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace; margin: 8px 0 16px; }
+    pre code { background: none; padding: 0; }
+    .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+    footer { border-top: 1px solid var(--border); padding: 32px 0 48px; font-size: 13px; color: var(--muted); }
+    footer p { margin: 0 0 8px; max-width: 90ch; }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <a class="brand" href="#top">
+        <span class="brand-mark" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>
+        </span>
+        <span>Insurance Sales Performance Agent<small>A Snow Packs example built on Snowflake</small></span>
+      </a>
+      <nav class="top-links" aria-label="Page">
+        <a href="#walkthrough">Walkthrough</a>
+        <a href="#capabilities">Capabilities</a>
+        <a href="#run">Run it</a>
+        <a href="https://github.com/sfc-gh-ooral/sfguide-insurance-sales-agent">Repository</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+    <div class="wrap hero">
+      <span class="eyebrow">Insurance · Sales</span>
+      <h1>Ask why the numbers moved, not just what moved.</h1>
+      <p class="lede">
+        Field reps who sell vehicle service contracts (VSC), GAP, and tire &amp; wheel coverage through car dealers get static reports that show <em>what</em> changed.
+        This example adds a plain-English layer on top: reps can see which dealers drove a volume drop, whether a loss ratio jump comes from more claims or bigger claims,
+        and where market share is slipping, then save a visit brief. Every answer shows the SQL behind it, and a person decides what to do next.
+      </p>
+      <div class="ctas">
+        <a class="btn primary" href="try/">Try the example in your browser</a>
+        <a class="btn" href="https://github.com/sfc-gh-ooral/sfguide-insurance-sales-agent">View the repository</a>
+      </div>
+      <ul class="facts" aria-label="At a glance">
+        <li><strong>No account needed</strong>The hosted example runs on bundled synthetic data in your browser.</li>
+        <li><strong>Deploy</strong>One setup script creates everything. It ran in about 40 seconds end to end in our test.</li>
+        <li><strong>Prerequisites</strong>Enterprise Edition (row access policy), Cortex AI in your region, Node.js 20+.</li>
+        <li><strong>Measured cost</strong>Agent questions averaged about 0.07 credits each in our test. The XSMALL warehouse suspends after 60 seconds idle.</li>
+      </ul>
+      <figure class="hero-shot">
+        <picture>
+          <source srcset="images/01-overview-light.png" media="(prefers-color-scheme: light)" />
+          <img src="images/01-overview-dark.png" width="1440" height="900" alt="Territory overview: written premium, contracts, attach rate, loss ratio, and market share with year-over-year changes, a monthly trend, and contracts by region with Southeast down 13.8%." />
+        </picture>
+      </figure>
+      <p class="note"><strong>Synthetic data, illustrative logic.</strong> Every dealer, rep, and number on this page is invented by a seeded generator. This is an example, not production software, and not regulatory, actuarial, or compliance advice.</p>
+    </div>
+
+    <section class="block" id="problem" aria-labelledby="problem-h">
+      <div class="wrap">
+        <h2 id="problem-h">The problem</h2>
+        <p class="sub">Dealer-distributed insurance sales teams already have BI reports. What they lack is a fast way to get from a changed number to its cause.</p>
+        <div class="grid3">
+          <div class="card"><h3>Reports show what, not why</h3><p>A region is down or a loss ratio jumped, but the report doesn't say which dealers, products, or claim types are behind it.</p></div>
+          <div class="card"><h3>Every question is a ticket</h3><p>Follow-up questions go to the analytics team and come back days later, often after the dealer visit.</p></div>
+          <div class="card"><h3>Answers must match BI and stay human-led</h3><p>Definitions have to match the existing reports, and the tool explains data only. It never changes pricing, underwriting, or claims.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" id="walkthrough" aria-labelledby="walk-h">
+      <div class="wrap">
+        <h2 id="walk-h">Walkthrough</h2>
+        <p class="sub">The screenshots below come from the running app in sample-data mode. Figures are from this synthetic data set.</p>
+
+        <div class="step">
+          <div>
+            <div class="step-num">Step 1 · Territory overview</div>
+            <h3>Spot the change</h3>
+            <p>Five KPIs with year-over-year deltas, a monthly trend, and contracts by region. On this data set, Southeast contracts are down 13.8% while other regions grew.</p>
+            <span class="badge">Semantic View</span>
+          </div>
+          <figure>
+            <div class="frame"><picture><source srcset="images/01-overview-light.png" media="(prefers-color-scheme: light)" /><img src="images/01-overview-dark.png" width="1440" height="900" loading="lazy" alt="Territory overview with KPI tiles and a contracts-by-region table flagging Southeast at minus 13.8 percent and an Ask the agent why link." /></picture></div>
+            <figcaption>Territory overview. KPI definitions come from the semantic view, so they match the BI report.</figcaption>
+          </figure>
+        </div>
+
+        <div class="step">
+          <div>
+            <div class="step-num">Step 2 · Ask the agent</div>
+            <h3>Get the why, with the SQL</h3>
+            <p>"Why is Southeast volume down this year?" The agent names the three dealers that stopped selling (each down about 90%) and shows a chart, the SQL it ran, and a <em>Verified query</em> badge when it used a reviewed query.</p>
+            <span class="badge">Cortex Agents</span><span class="badge">Cortex Analyst</span><span class="badge">Verified queries</span>
+          </div>
+          <figure>
+            <div class="frame"><picture><source srcset="images/02-agent-southeast-light.png" media="(prefers-color-scheme: light)" /><img src="images/02-agent-southeast-dark.png" width="1440" height="900" loading="lazy" alt="Agent answer explaining the Southeast decline with three named dealers, a bar chart of contract change by dealer, a Verified query badge, and the SQL used." /></picture></div>
+            <figcaption>The Cortex Agent answers with a chart and the SQL behind it. In the hosted example, answers are labeled "Sample AI response".</figcaption>
+          </figure>
+        </div>
+
+        <div class="step">
+          <div>
+            <div class="step-num">Step 3 · Dealer detail</div>
+            <h3>Separate frequency from severity</h3>
+            <p>Each product's loss ratio is split into claim frequency and claim severity. For one Georgia dealer, GAP loss ratio rose from 48.4% to 111.9% because the average claim nearly doubled while claim counts barely moved, which fits falling used-vehicle values.</p>
+            <span class="badge">Semantic View</span><span class="badge ai">AI_COMPLETE</span>
+          </div>
+          <figure>
+            <div class="frame"><picture><source srcset="images/04-dealer-detail-light.png" media="(prefers-color-scheme: light)" /><img src="images/04-dealer-detail-dark.png" width="1440" height="900" loading="lazy" alt="Dealer detail for Fairhaven Car Center: loss ratio decomposition table with GAP at 111.9 percent tagged Severity, product mix and attach rate charts, and a visit prep brief saved to My insights." /></picture></div>
+            <figcaption>Loss ratio decomposition and an AI visit prep brief. In live mode the brief comes from AI_COMPLETE.</figcaption>
+          </figure>
+        </div>
+
+        <div class="step">
+          <div>
+            <div class="step-num">Step 4 · My insights</div>
+            <h3>Save, annotate, and share a visit brief</h3>
+            <p>Reps pin agent answers and briefs, add their own notes, choose what to include, and export a visit brief. This is the human-in-the-loop step: the agent never takes action on its own.</p>
+            <span class="badge">Human in the loop</span>
+          </div>
+          <figure>
+            <div class="frame"><picture><source srcset="images/05-my-insights-light.png" media="(prefers-color-scheme: light)" /><img src="images/05-my-insights-dark.png" width="1440" height="900" loading="lazy" alt="My insights page with a saved visit brief for Fairhaven Car Center, a rep's note, a pinned agent answer, and buttons to export the visit brief or print it." /></picture></div>
+            <figcaption>Pinned answers and briefs with the rep's notes, ready to export.</figcaption>
+          </figure>
+        </div>
+
+        <div class="step">
+          <div>
+            <div class="step-num">Step 5 · Dealer explorer and View as</div>
+            <h3>Find movers, and see only your territory</h3>
+            <p>A sortable dealer table with sparklines and a Movers tab. Switch "View as" to the rep: in live mode a Snowflake row access policy limits results to the rep's territory (56 of 422 dealers here), in the app and in the agent's answers.</p>
+            <span class="badge">Row access policy</span>
+          </div>
+          <figure>
+            <div class="frame"><picture><source srcset="images/07-rep-view-light.png" media="(prefers-color-scheme: light)" /><img src="images/07-rep-view-dark.png" width="1440" height="900" loading="lazy" alt="Dealer explorer viewed as a field rep: 56 dealers in the Southeast Inland territory with a Row access policy applied badge." /></picture></div>
+            <figcaption>Rep view. The row access policy, not app code, decides which dealers appear in live mode.</figcaption>
+          </figure>
+        </div>
+
+        <div class="two">
+          <figure>
+            <div class="frame"><picture><source srcset="images/06-dealer-movers-light.png" media="(prefers-color-scheme: light)" /><img src="images/06-dealer-movers-dark.png" width="1440" height="900" loading="lazy" alt="Movers tab listing the biggest decliners, led by three dealers that switched provider, and the biggest gainers, led by Summit Auto Group dealers." /></picture></div>
+            <figcaption>Movers: the three provider switches top the decliners; a fast-growing dealer group leads the gainers.</figcaption>
+          </figure>
+          <figure>
+            <div class="frame"><picture><source srcset="images/03-agent-georgia-light.png" media="(prefers-color-scheme: light)" /><img src="images/03-agent-georgia-dark.png" width="1440" height="900" loading="lazy" alt="Agent answer showing the Georgia GAP loss ratio increase is driven by severity, with a chart of changes in loss ratio, frequency, and severity." /></picture></div>
+            <figcaption>The agent confirms the Georgia GAP increase is driven by severity, not frequency.</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" id="capabilities" aria-labelledby="cap-h">
+      <div class="wrap">
+        <h2 id="cap-h">Snowflake capabilities</h2>
+        <p class="sub">Each of these ran in live mode against the objects created by <code>sql/setup.sql</code>.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Capability</th><th>What it does here</th><th>Object</th></tr></thead>
+            <tbody>
+              <tr><td><a href="https://docs.snowflake.com/en/user-guide/views-semantic/sql">Semantic view</a></td><td>One set of metric definitions (written premium, attach rate, loss ratio, frequency, severity, market share) with synonyms reps use, such as "penetration" for attach rate.</td><td><code>INSURANCE_SALES_SV</code></td></tr>
+              <tr><td><a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-04-05-semantic-views-verified-queries">Verified queries</a></td><td>Ten reviewed question-and-SQL pairs. The agent uses them when a question matches, and the app shows a Verified query badge.</td><td><code>AI_VERIFIED_QUERIES</code> on the view</td></tr>
+              <tr><td><a href="https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-agents-manage">Cortex Agents</a> with Cortex Analyst</td><td>Answers "why" questions over the semantic view, called from the app with <code>DATA_AGENT_RUN</code>.</td><td><code>INSURANCE_SALES_AGENT</code></td></tr>
+              <tr><td><a href="https://docs.snowflake.com/en/sql-reference/functions/ai_complete">AI_COMPLETE</a></td><td>Writes the dealer visit prep brief from that dealer's numbers only.</td><td>Called from the app</td></tr>
+              <tr><td><a href="https://docs.snowflake.com/en/user-guide/security-row-intro">Row access policy</a></td><td>Limits a rep role to its territory, in every query and in the agent's answers.</td><td><code>TERRITORY_POLICY</code> on <code>DEALERS</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" id="run" aria-labelledby="run-h">
+      <div class="wrap">
+        <h2 id="run-h">Run it</h2>
+        <div class="two">
+          <div>
+            <h3>Sample-data mode (no account)</h3>
+            <p class="sub" style="margin-bottom:8px">Use the <a href="try/">hosted example</a>, or run it locally:</p>
+            <pre><code>git clone https://github.com/sfc-gh-ooral/sfguide-insurance-sales-agent
+cd sfguide-insurance-sales-agent
+npm install
+npm run dev</code></pre>
+          </div>
+          <div>
+            <h3>Live mode (your Snowflake account)</h3>
+            <p class="sub" style="margin-bottom:8px">Generate the data, run setup, then point the app at your account with key-pair authentication:</p>
+            <pre><code>npm run generate
+snow sql -f sql/setup.sql -c &lt;your_connection&gt;
+cp .env.example .env.local   # fill in account, user, key path
+npm run dev</code></pre>
+            <p style="font-size:14px;color:var(--text-2)">Remove everything with <code>sql/cleanup.sql</code>. See the <a href="https://github.com/sfc-gh-ooral/sfguide-insurance-sales-agent#readme">README</a> for prerequisites, the objects created, and known limitations.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" id="accuracy" aria-labelledby="acc-h">
+      <div class="wrap">
+        <h2 id="acc-h">Verified query check</h2>
+        <p class="sub">On this synthetic data set, all five suggested questions in the app were answered through the agent using a verified query. In a separate manual review of Cortex Analyst's SQL for all ten verified questions, nine matched the verified SQL and one was close (a time window shifted by a month). Treat this as a starting point for your own evaluation, not an accuracy guarantee.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <p>Synthetic data and illustrative logic only. Not production software, and not regulatory, actuarial, or compliance advice. The agent explains data; people make decisions.</p>
+      <p>An illustrative example built on Snowflake, provided as-is under the Apache 2.0 license. Not an official Snowflake product and not supported by Snowflake Support.</p>
+      <p>Owner: Oz Oral · Last reviewed: November 2026 · <a href="https://github.com/sfc-gh-ooral/sfguide-insurance-sales-agent">Repository</a> · <a href="https://sfc-gh-ooral.github.io/snow-packs/">More Snow Packs</a></p>
+    </div>
+  </footer>
+</body>
+</html>
