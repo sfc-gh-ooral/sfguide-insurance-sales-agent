@@ -1,1 +1,0 @@
-{"level":"ERROR","message":"[1:50:23.545 PM]: Connection[id: aa825b3f-0851-4e8a-bd88-96afdc2c622e] - connection failed after 675.24 milliseconds. Error: Role 'INSURANCE_SALES_DEMO_ROLE' specified in the connect string does not exist or not authorized. Contact your local system administrator, or attempt to login with another role, e.g. PUBLIC."}

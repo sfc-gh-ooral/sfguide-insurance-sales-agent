@@ -42,3 +42,6 @@ yarn-error.log*
 *.p8
 /data/csv/
 *.local.md
+
+# snowflake-sdk driver log
+*.log
