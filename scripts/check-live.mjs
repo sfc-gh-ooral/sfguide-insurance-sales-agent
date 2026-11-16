@@ -1,6 +1,6 @@
 // Live-mode check of the agent and visit brief through the app's API (run with the dev server up).
 const base = process.env.APP_URL ?? 'http://localhost:3210';
-const post = async (op, body) => (await fetch(`${base}/api/${op}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })).json();
+const post = async (op, body) => (await fetch(`${base}/api/${op}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ...body, mode: 'live' }) })).json();
 
 const questions = [
   ['director', 'Why is Southeast volume down this year?'],

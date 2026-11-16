@@ -9,8 +9,15 @@ import { saveInsight } from '@/lib/insights';
 import type { VisitBrief } from '@/lib/types';
 import { cn, fmtNum, fmtPct, fmtUsd, monthLabel, yoy } from '@/lib/utils';
 import { useAppState } from '@/components/AppState';
-import { Card, CardHeader, Delta, PoweredBy, RichText, SampleAiLabel } from '@/components/ui';
+import { Card, CardHeader, Delta, PoweredBy, RichText, SampleAiLabel, ThinkingSteps } from '@/components/ui';
 import { ErrorNote, Loading, useQuery } from '@/components/useQuery';
+
+// Each step names work the live path really performs (see lib/snowflake.ts brief()).
+const BRIEF_STEPS = [
+  'Applying your role\'s row access policy (TERRITORY_POLICY)',
+  'Querying this dealer\'s metrics on INSURANCE_SALES_WH',
+  'Drafting the brief with AI_COMPLETE (claude-sonnet-4-5)',
+];
 
 export default function DealerPage() {
   return <Suspense fallback={<Loading />}><DealerDetailView /></Suspense>;
@@ -18,9 +25,10 @@ export default function DealerPage() {
 
 function DealerDetailView() {
   const id = useSearchParams().get('id') ?? '';
-  const { persona } = useAppState();
+  const { persona, preferred } = useAppState();
   const { data, error, loading } = useQuery(() => api.dealer({ persona }, id), [persona, id]);
   const [brief, setBrief] = useState<VisitBrief | null>(null);
+  const [briefMs, setBriefMs] = useState<number | null>(null);
   const [briefLoading, setBriefLoading] = useState(false);
   const [briefError, setBriefError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
@@ -41,7 +49,7 @@ function DealerDetailView() {
   const decomp = data.decomposition.filter((x) => x.ttm.premium + x.prior.premium > 0);
   const generate = async () => {
     setBriefLoading(true); setBriefError(null); setSaved(false);
-    try { setBrief((await api.brief({ persona }, id)).data); } catch (e) { setBriefError((e as Error).message); } finally { setBriefLoading(false); }
+    try { const r = await api.brief({ persona }, id); setBrief(r.data); setBriefMs(r.ms); } catch (e) { setBriefError((e as Error).message); } finally { setBriefLoading(false); }
   };
   const save = () => {
     if (!brief) return;
@@ -153,23 +161,23 @@ function DealerDetailView() {
           <CardHeader title="Visit prep brief" subtitle="An AI summary of this dealer for your next visit"
             right={brief?.source === 'sample' ? <SampleAiLabel /> : brief ? <PoweredBy label={`AI_COMPLETE · ${brief.model}`} /> : <PoweredBy label="AI_COMPLETE" />} />
           {!brief && !briefLoading && (
-            <button onClick={generate} className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-white hover:opacity-90">
+            <button onClick={generate} className="btn-ai flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-white">
               <Sparkles className="h-4 w-4" aria-hidden /> Generate visit brief
             </button>
           )}
-          {briefLoading && <div className="animate-pulse text-sm text-muted">Writing the brief…</div>}
+          {briefLoading && <ThinkingSteps title="Writing the brief" steps={BRIEF_STEPS} stepMs={1600} simulated={preferred !== 'live'} />}
           {briefError && <ErrorNote message={briefError} />}
           {brief && (
-            <div className="space-y-4">
+            <div className="fade-up space-y-4">
               <RichText text={brief.text} />
               <div className="flex flex-wrap gap-2 border-t border-line pt-4">
                 <button onClick={save} disabled={saved}
-                  className={cn('flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold', saved ? 'bg-positive/10 text-positive' : 'bg-accent text-white hover:opacity-90')}>
+                  className={cn('flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold', saved ? 'bg-positive/10 text-positive' : 'btn-primary text-white')}>
                   {saved ? <Check className="h-4 w-4" /> : <Bookmark className="h-4 w-4" />} {saved ? 'Saved to My insights' : 'Save to My insights'}
                 </button>
                 <button onClick={generate} className="rounded-lg border border-line px-3 py-2 text-sm font-medium text-ink-2 hover:bg-surface-2">Regenerate</button>
               </div>
-              <p className="text-[11px] text-muted">Review before you use it. The brief summarizes data; it does not recommend pricing, underwriting, or claims decisions.</p>
+              <p className="text-[11px] text-muted">Review before you use it. The brief summarizes data; it does not recommend pricing, underwriting, or claims decisions.{briefMs != null && <span className="tabular">{brief.source === 'sample' ? ` Simulated ${(briefMs / 1000).toFixed(1)}s.` : ` Answered in ${(briefMs / 1000).toFixed(1)}s.`}</span>}</p>
             </div>
           )}
         </Card>

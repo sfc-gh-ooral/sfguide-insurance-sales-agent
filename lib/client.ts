@@ -7,7 +7,13 @@ import type { AgentAnswer, DealerDetail, DealerRow, MetricDefinition, Overview, 
 
 export type Mode = 'sample' | 'live';
 
-async function call<T>(op: string, body: Record<string, unknown>): Promise<{ data: T; mode: Mode }> {
+// The header switch sets this; every request carries it so the server serves the chosen source.
+let requested: Mode = 'sample';
+export const setRequestedMode = (m: Mode) => { requested = m; };
+
+async function call<T>(op: string, body: Record<string, unknown>): Promise<{ data: T; mode: Mode; ms: number }> {
+  const t0 = performance.now();
+  const done = <R extends { data: T; mode: Mode }>(r: R) => ({ ...r, ms: Math.round(performance.now() - t0) });
   if (HOSTED_EXAMPLE) {
     const { mockSource } = await import('./mock-source');
     const src = mockSource as SalesSource;
@@ -20,12 +26,12 @@ async function call<T>(op: string, body: Record<string, unknown>): Promise<{ dat
       ask: () => src.ask(s, body.question as string),
       brief: () => src.brief(s, body.id as string),
     } as Record<string, () => Promise<unknown>>)[op]();
-    return { data: data as T, mode: 'sample' };
+    return done({ data: data as T, mode: 'sample' as Mode });
   }
-  const res = await fetch(`/api/${op}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  const res = await fetch(`/api/${op}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...body, mode: requested }) });
   const json = await res.json();
   if (!res.ok) throw new Error(json.error ?? `Request failed (${res.status})`);
-  return json;
+  return done(json as { data: T; mode: Mode });
 }
 
 export const api = {

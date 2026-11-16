@@ -291,11 +291,19 @@ function brief(scope: Scope, id: string): VisitBrief {
   return { text: lines.join('\n'), source: 'sample' };
 }
 
+// Sample mode answers instantly from bundled JSON. These delays approximate the live round trips
+// (warehouse queries well under a second; Cortex Agent and AI_COMPLETE calls several seconds) so the
+// experience matches what readers will see on their own account. The UI labels this time as simulated.
+export const SIMULATED_MS = { data: [250, 550], ask: [4500, 7000], brief: [4000, 6500] } as const;
+// Random jitter only changes timing; the answers themselves stay deterministic.
+const wait = ([lo, hi]: readonly [number, number], _key: string) =>
+  new Promise<void>((r) => setTimeout(r, lo + Math.random() * (hi - lo)));
+
 export const mockSource: SalesSource = {
-  overview: async (s) => overview(s),
-  dealers: async (s) => dealerRows(s),
-  dealer: async (s, id) => dealerDetail(s, id),
+  overview: async (s) => { await wait(SIMULATED_MS.data, 'o' + JSON.stringify(s)); return overview(s); },
+  dealers: async (s) => { await wait(SIMULATED_MS.data, 'd' + JSON.stringify(s)); return dealerRows(s); },
+  dealer: async (s, id) => { await wait(SIMULATED_MS.data, id); return dealerDetail(s, id); },
   definitions: async () => METRIC_DEFINITIONS,
-  ask: async (s, q) => answer(s, q),
-  brief: async (s, id) => brief(s, id),
+  ask: async (s, q) => { await wait(SIMULATED_MS.ask, q); return answer(s, q); },
+  brief: async (s, id) => { await wait(SIMULATED_MS.brief, id); return brief(s, id); },
 };

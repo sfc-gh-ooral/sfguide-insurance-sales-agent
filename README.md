@@ -40,7 +40,9 @@ npm install
 npm run dev        # http://localhost:3000
 ```
 
-Without `.env.local`, the app computes every screen from the bundled synthetic data (`data/mock/dataset.json`). Agent answers and visit briefs are scripted from the same numbers and labeled **Sample AI response**.
+Without `.env.local`, the app computes every screen from the bundled synthetic data (`data/mock/dataset.json`). Agent answers and visit briefs are scripted from the same numbers and labeled **Sample AI response**. Sample AI calls wait 4 to 7 seconds and show the same progress steps the live path runs (row access policy, Cortex Agent, Cortex Analyst SQL, warehouse query, AI_COMPLETE), marked as simulated time, so the example feels like the live app.
+
+A **Sample / Live** switch in the header always shows which mode is on. Picking Live without a connection shows the setup steps below instead of switching; the app never asks for credentials in the browser.
 
 ## Live mode: run it in your Snowflake account
 
@@ -59,7 +61,7 @@ Without `.env.local`, the app computes every screen from the bundled synthetic d
    cp .env.example .env.local      # set SNOWFLAKE_ACCOUNT, SNOWFLAKE_USERNAME, SNOWFLAKE_PRIVATE_KEY_PATH
    npm run dev
    ```
-   The sidebar shows **Live: Snowflake**. "View as: Director" uses `INSURANCE_SALES_DEMO_ROLE`; "View as: Rep" uses `INSURANCE_SALES_REP_ROLE`. Setup grants both roles to the user who ran it.
+   The header switch defaults to **Live** once a connection is configured (you can still pick Sample), the sidebar shows **Live: Snowflake**, and each AI answer reports its measured latency. A failed live call shows the error; it never falls back to sample data. "View as: Director" uses `INSURANCE_SALES_DEMO_ROLE`; "View as: Rep" uses `INSURANCE_SALES_REP_ROLE`. Setup grants both roles to the user who ran it.
 5. **Optional check:** with the app running, `node scripts/check-live.mjs` asks the agent the suggested questions as both personas and generates two visit briefs.
 
 To remove everything: `snow sql -f sql/cleanup.sql -c <your_connection>`.

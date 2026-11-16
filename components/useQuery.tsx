@@ -20,7 +20,15 @@ export function useQuery<T>(load: () => Promise<{ data: T; mode: Mode }>, deps: 
 }
 
 export function Loading({ label = 'Loading…' }: { label?: string }) {
-  return <div className="animate-pulse rounded-xl border border-line bg-surface p-8 text-sm text-muted">{label}</div>;
+  return (
+    <div role="status" aria-label={label} className="space-y-4">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
+        {Array.from({ length: 5 }, (_, i) => <div key={i} className="skeleton h-[104px] rounded-2xl" />)}
+      </div>
+      <div className="skeleton h-72 rounded-2xl" />
+      <span className="sr-only">{label}</span>
+    </div>
+  );
 }
 
 export function ErrorNote({ message }: { message: string }) {

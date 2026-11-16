@@ -21,7 +21,10 @@ export async function POST(request: Request, ctx: { params: Promise<{ op: string
   const id = typeof body.id === 'string' ? body.id.slice(0, 20) : '';
   const question = typeof body.question === 'string' ? body.question.slice(0, 500) : '';
 
-  const live = isSnowflakeConfigured();
+  const live = body.mode === 'live';
+  if (live && !isSnowflakeConfigured()) {
+    return NextResponse.json({ error: 'Live mode needs a Snowflake connection. Add the SNOWFLAKE_* lines to .env.local (see the README) and restart npm run dev.' }, { status: 503 });
+  }
   const src: SalesSource = live ? liveSource : mockSource;
   try {
     const data = await ({

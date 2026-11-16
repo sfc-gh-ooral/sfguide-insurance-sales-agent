@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { useState } from 'react';
-import { ArrowRight, BookOpen, Bot } from 'lucide-react';
+import { ArrowRight, BookOpen, Bot, Sparkles, Store } from 'lucide-react';
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { api } from '@/lib/client';
 import { PERIOD_LABEL, PERSONAS, REGIONS, TIERS } from '@/lib/sales-data';
@@ -30,9 +30,29 @@ export default function OverviewPage() {
 
   return (
     <div className="space-y-6">
+      <section className="fade-up relative overflow-hidden rounded-2xl sidebar-brand p-6 shadow-xl sm:p-8">
+        <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full brand-gradient opacity-40 blur-3xl" aria-hidden />
+        <div className="pointer-events-none absolute -bottom-28 left-1/3 h-64 w-64 rounded-full ai-gradient opacity-25 blur-3xl" aria-hidden />
+        <div className="relative max-w-3xl">
+          <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-2.5 py-0.5 text-[11px] font-medium text-sky-100">
+            <Sparkles className="h-3 w-3 text-sky-300" aria-hidden /> Cortex Agents · Semantic Views · AI_COMPLETE
+          </div>
+          <h1 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">Know why your numbers moved, <span className="bg-gradient-to-r from-sky-300 to-violet-300 bg-clip-text text-transparent">not just that they did.</span></h1>
+          <p className="mt-2 text-sm leading-relaxed text-sky-100/80">Track dealer contracts, attach rate, loss ratio, and market share for {PERSONAS[persona].detail.toLowerCase()}, then ask the agent to explain any change in plain English.</p>
+          <div className="mt-5 flex flex-wrap gap-2">
+            <Link href={`/agent?q=${encodeURIComponent('Why is Southeast volume down this year?')}`} className="btn-primary inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-semibold text-white">
+              <Bot className="h-4 w-4" aria-hidden /> Ask the agent a question
+            </Link>
+            <Link href="/dealers" className="inline-flex items-center gap-1.5 rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/20">
+              <Store className="h-4 w-4" aria-hidden /> Explore dealers <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+            </Link>
+          </div>
+        </div>
+      </section>
+
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-xl font-semibold text-ink">Territory overview</h1>
+          <h2 className="text-lg font-semibold text-ink">Territory overview</h2>
           <p className="mt-1 text-sm text-muted">
             {PERSONAS[persona].detail} · This year ({PERIOD_LABEL.ttm}) vs last year ({PERIOD_LABEL.prior})
           </p>
@@ -48,7 +68,7 @@ export default function OverviewPage() {
       {!data && !error && <Loading />}
       {data && (
         <>
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
+          <div className="stagger grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
             <Kpi label="Written premium" value={fmtUsd(data.kpis.premium.ttm)} delta={<Delta value={yoy(data.kpis.premium.ttm, data.kpis.premium.prior)} />} />
             <Kpi label="Contracts" value={fmtNum(data.kpis.contracts.ttm)} delta={<Delta value={yoy(data.kpis.contracts.ttm, data.kpis.contracts.prior)} />} />
             <Kpi label="Attach rate" value={fmtPct(data.kpis.attachRate.ttm)} delta={<Delta unit="pts" value={data.kpis.attachRate.ttm - data.kpis.attachRate.prior} />} />
@@ -105,7 +125,7 @@ export default function OverviewPage() {
                 </tbody>
               </table>
               {worst && (yoy(worst.contracts.ttm, worst.contracts.prior) ?? 0) < -0.05 && (
-                <div className="mt-4 rounded-lg border border-line bg-surface-2 p-3 text-xs text-ink-2">
+                <div className="ai-border mt-4 rounded-xl bg-ai-soft/50 p-3 text-xs text-ink-2">
                   <strong className="text-ink">{worst.region}</strong> contracts are down {fmtPct(Math.abs(yoy(worst.contracts.ttm, worst.contracts.prior) ?? 0))}.
                   <Link href={`/agent?q=${encodeURIComponent(`Why is ${worst.region} volume down this year?`)}`}
                     className="mt-2 flex items-center gap-1 font-medium text-accent hover:underline">

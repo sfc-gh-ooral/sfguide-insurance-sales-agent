@@ -1,9 +1,47 @@
 'use client';
-import { Sparkles, ShieldCheck, Cpu, TrendingDown, TrendingUp, Minus } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Sparkles, ShieldCheck, Cpu, TrendingDown, TrendingUp, Minus, Check, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export function Card({ className, children }: { className?: string; children: React.ReactNode }) {
-  return <section className={cn('rounded-xl border border-line bg-surface p-5', className)}>{children}</section>;
+  return <section className={cn('fade-up rounded-2xl border border-line bg-surface p-5 card-elev', className)}>{children}</section>;
+}
+
+export function Skeleton({ className }: { className?: string }) {
+  return <div className={cn('skeleton', className)} aria-hidden />;
+}
+
+// Progress panel shown while an AI call runs. Steps advance on a timer that mirrors the real
+// pipeline; the last step stays active until the answer arrives. Sample mode says it is simulated.
+export function ThinkingSteps({ title, steps, stepMs = 1100, simulated }: { title: string; steps: string[]; stepMs?: number; simulated: boolean }) {
+  const [i, setI] = useState(0);
+  const [ms, setMs] = useState(0);
+  useEffect(() => {
+    const t0 = Date.now();
+    const tick = setInterval(() => setMs(Date.now() - t0), 100);
+    const step = setInterval(() => setI((n) => Math.min(n + 1, steps.length - 1)), stepMs);
+    return () => { clearInterval(tick); clearInterval(step); };
+  }, [steps.length, stepMs]);
+  return (
+    <div role="status" aria-live="polite" className="ai-border ai-glow fade-up rounded-2xl bg-surface p-5 card-elev">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-2 text-sm font-semibold text-ink">
+          <span className="ai-gradient flex h-6 w-6 items-center justify-center rounded-md text-white"><Sparkles className="h-3.5 w-3.5" aria-hidden /></span>
+          {title}
+          <span className="ml-1 inline-flex gap-1" aria-hidden><i className="typing-dot" /><i className="typing-dot" /><i className="typing-dot" /></span>
+        </div>
+        <span className="text-[11px] tabular text-muted">{(ms / 1000).toFixed(1)}s{simulated ? ' · simulated processing time' : ''}</span>
+      </div>
+      <ol className="space-y-1.5">
+        {steps.map((s, k) => (
+          <li key={s} className={cn('flex items-center gap-2 text-sm transition-opacity', k > i ? 'opacity-35' : 'opacity-100', k === i ? 'text-ink' : 'text-ink-2')}>
+            {k < i ? <Check className="h-3.5 w-3.5 text-positive" aria-hidden /> : k === i ? <Loader2 className="spin-slow h-3.5 w-3.5 text-ai" aria-hidden /> : <span className="h-3.5 w-3.5 rounded-full border border-line" aria-hidden />}
+            {s}
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
 }
 
 export function CardHeader({ title, subtitle, right }: { title: string; subtitle?: string; right?: React.ReactNode }) {
@@ -22,8 +60,8 @@ export function CardHeader({ title, subtitle, right }: { title: string; subtitle
 export function PoweredBy({ label, policy }: { label: string; policy?: boolean }) {
   const Icon = policy ? ShieldCheck : Cpu;
   return (
-    <span className="inline-flex items-center gap-1 rounded-full border border-line bg-surface-2 px-2 py-0.5 text-[11px] font-medium text-ink-2">
-      <Icon className="h-3 w-3 text-accent" aria-hidden /> {policy ? '' : 'Powered by '}{label}
+    <span className="inline-flex items-center gap-1 rounded-full border border-accent/25 bg-accent-soft px-2.5 py-0.5 text-[11px] font-medium text-accent">
+      <Icon className="h-3 w-3" aria-hidden /> {policy ? '' : 'Powered by '}{label}
     </span>
   );
 }
@@ -31,7 +69,7 @@ export function PoweredBy({ label, policy }: { label: string; policy?: boolean }
 // Required label on every scripted (mocked) AI output.
 export function SampleAiLabel() {
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-ai-soft px-2 py-0.5 text-[11px] font-semibold text-ai">
+    <span className="inline-flex items-center gap-1 rounded-full border border-ai/25 bg-ai-soft px-2.5 py-0.5 text-[11px] font-semibold text-ai">
       <Sparkles className="h-3 w-3" aria-hidden /> Sample AI response
     </span>
   );
@@ -52,7 +90,7 @@ export function Delta({ value, goodWhenUp = true, unit = 'pct' }: { value: numbe
 
 export function Kpi({ label, value, delta, note }: { label: string; value: string; delta: React.ReactNode; note?: string }) {
   return (
-    <div className="rounded-xl border border-line bg-surface p-4">
+    <div className="kpi-accent lift fade-up rounded-2xl border border-line bg-surface p-4 card-elev">
       <div className="text-[11px] font-semibold uppercase tracking-wide text-muted">{label}</div>
       <div className="mt-2 text-2xl font-semibold text-ink tabular">{value}</div>
       <div className="mt-1 flex items-center gap-2">{delta}<span className="text-[11px] text-muted">{note ?? 'vs last year'}</span></div>
