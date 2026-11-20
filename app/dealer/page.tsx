@@ -75,7 +75,7 @@ function DealerDetailView() {
       </div>
 
       <div className="grid gap-6 xl:grid-cols-3">
-        <div className="space-y-6 xl:col-span-2">
+        <div className="min-w-0 space-y-6 xl:col-span-2">
           <Card>
             <CardHeader title="Loss ratio decomposition" subtitle="Loss ratio ≈ frequency (claims per contract) × severity (avg paid claim) ÷ avg premium. This year vs last year." right={<PoweredBy label="Semantic View" />} />
             <div className="overflow-x-auto">

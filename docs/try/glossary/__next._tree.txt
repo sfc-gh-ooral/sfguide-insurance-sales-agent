@@ -1,2 +1,2 @@
-:HL["/sfguide-insurance-sales-agent/try/_next/static/chunks/33exhu7wudr3i.css","style"]
-0:{"tree":{"name":"","param":null,"prefetchHints":4176,"slots":{"children":{"name":"glossary","param":null,"prefetchHints":4192,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":4256,"slots":null}}}}},"staleTime":300,"buildId":"4mNflcaJncCnKmQPP2oAI"}
+:HL["/sfguide-insurance-sales-agent/try/_next/static/chunks/1c5e83gyal_9e.css","style"]
+0:{"tree":{"name":"","param":null,"prefetchHints":4176,"slots":{"children":{"name":"glossary","param":null,"prefetchHints":4192,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":4256,"slots":null}}}}},"staleTime":300,"buildId":"OJHPFyehb9OpHUsgJcmSB"}
